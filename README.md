@@ -11,9 +11,10 @@ As my database project queries all written manually in SQL. You can view .sql co
 
 # About this project
 This repository contains an academic project focused on designing and developing a database management system for Basket4U, an online grocery store based in Yangon, Myanmar. 
-This project aims to enhance customer convenience and streamline order handling by creating a digital online database. 
-The developed database focuses on ease of managing records related to customer purchases, products, orders, payments and delivery information and viewing necessary reports that contributes to help Basket4U adjusting demand and supply of products, customers and thier orders.
 
+This project aims to enhance customer convenience and streamline order handling by creating a digital online database. 
+
+The developed database focuses on ease of managing records related to customer purchases, products, orders, payments and delivery information and viewing necessary reports that contributes to help Basket4U adjusting demand and supply of products, customers and thier orders.
 
 Please note that this is a summary of the project's description. For more detailed information, please refer to the project documentation in pdf format.
 
