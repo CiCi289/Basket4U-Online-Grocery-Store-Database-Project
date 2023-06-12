@@ -1,0 +1,680 @@
+/*----------CREATE QUERY CODES----------*/
+/*---1. Suppliers---*/
+CREATE TABLE Suppliers
+(
+	SupplierID Varchar(10) NOT NULL UNIQUE,
+	SupplierName Varchar(60) NOT NULL,
+	ContactPhone Varchar(20),
+	SupplierDescription Varchar(100),
+	SupplierAddress Varchar(150),
+	Primary Key (SupplierID),
+	CHECK (SupplierID LIKE ('S-%'))
+);
+
+Select * FROM Suppliers;
+
+/*---2. Categories---*/
+CREATE TABLE Categories
+(
+	CategoryID Varchar(10) NOT NULL UNIQUE,
+	CategoryName Varchar(40) NOT NULL,
+	CategoryDescription Varchar(150),
+	Primary Key (CategoryID),
+	CHECK (CategoryID LIKE ('Cat-%'))
+);
+
+Select * FROM Categories;
+
+/*---3. Customers---*/
+CREATE TABLE Customers
+(
+	CustomerID Varchar(10) NOT NULL UNIQUE,
+	CustomerName Varchar(100),
+	CustomerEmail Varchar(100),
+	CustomerPhone Varchar(20),
+	CustomerAddress Varchar(150),
+	Primary Key (CustomerID),
+	CHECK (CustomerID LIKE ('Cus-%') AND
+	CustomerEmail LIKE ('%@gmail.com'))
+);
+
+Select * FROM Customers;
+
+/*---4. Employees---*/
+CREATE TABLE Employees
+(
+	EmployeeID Varchar(10) NOT NULL UNIQUE,
+	EmployeeName Varchar(100) NOT NULL,
+	Gender Varchar(30),
+	Position Varchar(30) NOT NULL,
+	EmployeeEmail Varchar(100),
+	EmployeeAddress Varchar(150),
+	DateOfBirth DATE,
+	Primary Key (EmployeeID),
+	CHECK (EmployeeID LIKE ('E-%') AND 
+	Gender IN ('Male','Female','Others') AND
+	EmployeeEmail LIKE ('%@gmail.com'))
+);
+
+Select * FROM Employees;
+
+/*---5. Promotions---*/
+CREATE TABLE Promotions
+(
+	PromotionID Varchar(15) NOT NULL UNIQUE,
+	PromotionCode Varchar(20) NOT NULL,
+	PromotionType Varchar(30),
+	PromotionDescription Varchar(255),
+	PromotionAmount Decimal(10,2),
+	PromotionActive Varchar(20),
+	PromotionStartDate DATE,
+	PromotionEndDate DATE,
+	Primary Key (PromotionID),
+	CHECK (PromotionID LIKE ('Promo-%') AND 
+	PromotionType IN ('Discount Percentage','Discount Amount') AND 
+	PromotionActive IN ('Active','Expired'))
+);
+
+Select * FROM Promotions;
+
+/*---6. Delivery---*/
+CREATE TABLE Delivery
+(
+	DeliveryID Varchar(15) NOT NULL UNIQUE,
+	DeliveryDate DATE,
+	Primary Key (DeliveryID),
+	CHECK (DeliveryID LIKE ('Deli-%'))
+);
+
+Select * FROM Delivery;
+
+/*---7. Purchases---*/
+CREATE TABLE Purchases
+(
+	PurchaseID Varchar(10) NOT NULL UNIQUE,
+	PurchaseDate DATE NOT NULL,
+	SupplierID Varchar(10) NOT NULL,
+	Primary Key (PurchaseID),
+	Foreign Key (SupplierID) REFERENCES Suppliers (SupplierID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	CHECK (PurchaseID LIKE ('Pur-%') AND
+	SupplierID LIKE ('S-%'))
+);
+
+Select * FROM Purchases;
+
+/*---8. Products---*/
+CREATE TABLE Products
+(
+	ProductID Varchar(10) NOT NULL UNIQUE,
+	ProductName Varchar(100) NOT NULL,
+	CategoryID Varchar(10) NOT NULL,
+	ProductWeight Decimal(6,2),
+	WeightUnit Varchar(10),
+	UnitPrice Decimal(10,2),
+	ExpiryDate DATE,
+	Primary Key (ProductID),
+	Foreign Key (CategoryID) REFERENCES Categories (CategoryID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	CHECK (ProductID LIKE ('P-%') AND
+	CategoryID LIKE ('Cat-%') AND
+	WeightUnit IN ('Viss','g','kg','mL','L'))
+);
+
+Select * FROM Products;
+
+/*---9. PurchasedProducts---*/
+CREATE TABLE PurchasedProducts
+(
+	PurchaseID Varchar(10) NOT NULL,
+	ProductID Varchar(10) NOT NULL,
+	PurchaseLineQuantity Integer,
+	Primary Key (PurchaseID,ProductID),
+	Foreign Key (PurchaseID) REFERENCES Purchases(PurchaseID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	Foreign Key (ProductID) REFERENCES Products(ProductID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	CHECK (PurchaseID LIKE ('Pur-%') AND
+	ProductID LIKE ('P-%'))
+);
+
+Select * FROM PurchasedProducts;
+
+/*---10. Orders---*/
+CREATE TABLE Orders
+(
+	OrderID Varchar(10) NOT NULL UNIQUE,
+	CustomerID Varchar(10) NOT NULL,
+	OrderDate DATE NOT NULL,
+	PromotionID Varchar(15),
+	PaymentAmount Decimal(10,2),
+	PaymentType Varchar(20) DEFAULT 'Cash on Delivery',
+	PaymentStatus Varchar(15) DEFAULT 'Not Paid',
+	OrderStatus Varchar(20) DEFAULT 'Preparing',
+	EmployeeID Varchar(10),
+	DeliveryID Varchar(15),
+	DeliveryAddress Varchar(255),
+	Primary Key (OrderID),
+	Foreign Key (CustomerID) REFERENCES Customers(CustomerID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	Foreign Key (PromotionID) REFERENCES Promotions (PromotionID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	Foreign Key (EmployeeID) REFERENCES Employees (EmployeeID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	Foreign Key (DeliveryID) REFERENCES Delivery (DeliveryID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	CHECK (OrderID LIKE ('Ord-%') AND
+	PromotionID LIKE ('Promo-%') AND
+	PaymentType IN ('Cash on Delivery','CBPay','KPay','Credit/Debit') AND
+	PaymentStatus IN ('Paid','Not Paid') AND
+	OrderStatus IN ('Preparing','On the way','Delivered') AND
+	EmployeeID LIKE ('E-%') AND
+	DeliveryID LIKE ('Deli-%'))
+);
+
+Select * FROM Orders;
+
+/*---11. OrderProducts---*/
+CREATE TABLE OrderProducts
+(
+	OrderID Varchar(10) NOT NULL,
+	ProductID Varchar(10) NOT NULL,
+	OrderLineQuantity Integer,
+	Primary Key (OrderID,ProductID),
+	Foreign Key (OrderID) REFERENCES Orders (OrderID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	Foreign Key (ProductID) REFERENCES Products (ProductID) ON UPDATE CASCADE ON DELETE NO ACTION,
+	CHECK (OrderID LIKE ('Ord-%') AND
+	ProductID LIKE ('P-%'))
+);
+
+Select * FROM OrderProducts;
+
+
+
+
+/*----------INSERT QUERY CODES----------*/
+/*---1. Suppliers---*/
+INSERT INTO Suppliers 
+		(SupplierID,SupplierName,ContactPhone,SupplierDescription,SupplierAddress)
+VALUES	('S-001','Shwe Si Daw','09565656565','Shwe Si Daw sells wet market products such as meats, vegetables, fruits','Tarmwe, Yangon'),
+		('S-002','Uncle Lay','09666666666','Uncle Lay sells Snacks and Beverages','Yankin, Yangon'),
+		('S-003','Top Meat','09564361237','Top Meat sells various types of meats and seafood','Ahlone, Yangon'),
+		('S-004','Aung Kabar','09324364784','Aung Kabar sells various cooking groceries such as rice, oil, condensed milk, coffeemix','Tarmwe, Yangon'),
+		('S-005','Three Nines','09635604826','Three Nines sells Wine bottles','Yankin, Yangon'),
+		('S-006','Mya Na Di','09669703970','Mya Na Di sells medicines and drugs','North Dagon, Yangon'),
+		('S-007','Aung Chan Thar','09798345137','Aung Chan Thar sells personal hygiene products','Tharkaeta, Yangon'),
+		('S-008','Pucci','09798523673','Pucci sells Pucci bakery products such as toast bread, cakes, puffs','Shwe Gone Dine, Yangon'),
+		('S-009','Baby Mall','09798351677','Baby Mall sells various products for Mothers and Child such as Diapers, Baby suppliments','Tarmwe, Yangon'),
+		('S-010','Two Brothers','09894127532','Two Brothers sells ready to eat food','Botahtaung, Yangon');
+
+Select * FROM Suppliers;
+
+/*---2. Categories---*/
+INSERT INTO Categories
+		(CategoryID,CategoryName,CategoryDescription)
+VALUES	('Cat-001','Meats and Seafood','Includes chicken, pork, beef, seafood, etc'),
+		('Cat-002','Fruits and Vegetables','Includes fruits and vegetables such as grapes, apples, oranges, potato, cabbages, gourd, radish, etc'),
+		('Cat-003','Snacks and Beverages','Includes snacks such as biscuits, crackers, noodles and beverages such as orange juices, coca cola, etc'),
+		('Cat-004','Wine','Includes various kinds of wine bottles'),
+		('Cat-005','Ready To Eat','Includes ready to eat food such as fried dumplings, etc'),
+		('Cat-006','Mother and Childcare','Includes products for mothers and their child such as suppliments, diapers, etc'),
+		('Cat-007','Personal Hygiene','Includes personal hygiene products such as shampoo, hand wash, soaps, etc'),
+		('Cat-008','Medicines and Drugs','Includes medicines and drugs like Biogesic, Flumox, etc'),
+		('Cat-009','Pucci Cake and Bread','Includes products from Pucci such as English toasts, Cakes, etc'),
+		('Cat-010','Cooking Groceries','Includes daily necessary products such as rice, oil, salt, fish sauce, MSG, etc');
+
+Select * FROM Categories;
+
+/*---3. Customers---*/
+INSERT INTO Customers
+		(CustomerID,CustomerName,CustomerEmail,CustomerPhone,CustomerAddress)
+VALUES	('Cus-001','Maung Maung','MaungMaung2@gmail.com','09454545454','No.19, Room 301, 123th street, MingalarTaungNyunt Tsp, Yangon'),
+		('Cus-002','Kaung Khant','KaungKhant2kk@gmail.com','09456712345','No.114, Room 201, 135th street, MingalarTaungNyunt Tsp, Yangon'),
+		('Cus-003','Ci Ci','CiCi289@gmail.com','09756970488','No.15, Room 201, Aung Tha Pyay street, MingalarTaungNyunt Tsp, Yangon'),
+		('Cus-004','Aung Khant','AungKhant225@gmail.com','09798352794','No.31, Room 501, Aung Tha Pyay street, MingalarTaungNyunt Tsp, Yangon'),
+		('Cus-005','Arkar Bhone','AkBhone666@gmail.com','09798432643','No.69, Ground Floor, Witt Kyaung street, Yay Kyaw Tsp, Yangon'),
+		('Cus-006','Ingyin Khin','IngyinK612@gmail.com','09894102507','No.80, Room 301, Witt Kyaung street, Yay Kyaw Tsp, Yangon'),
+		('Cus-007','Mya Layy','Myalayy222@gmail.com','09894111245','No.55, Room 401, Aww Bar street, Kyauk Myaung Tsp, Yangon'),
+		('Cus-008','Myint Than','Umyintthan683@gmail.com','09798562684','No.134, Ground Floor, Kyi Taw street, Pazuntaung Tsp, Yangon'),
+		('Cus-009','Kyaw Shane','KyawS111@gmail.com','09894110503','No.64, Room 201, Than street, Hlaing Tsp, Yangon'),
+		('Cus-010','Aye Thin Khine','ATKhine999@gmail.com','09756848392','No.101, Ground Floor, 51st street, Botahtaung Tsp, Yangon');
+
+SELECT * FROM Customers;
+
+/*---4. Employees---*/
+INSERT INTO Employees
+		(EmployeeID,EmployeeName,Gender,Position,EmployeeEmail,EmployeeAddress,DateOfBirth)
+VALUES	('E-001','Ei Chaw','Female','Cashier','EiChaw21@gmail.com','No.64, Room 401, Thidar street, MingalarTaungNyunt Tsp, Yangon','1989-09-21'),
+		('E-002','Arkar Min','Male','Cashier','ArkarM16@gmail.com','No.70, Room 301, U Pone Nya street, North Dagon Tsp, Yangon','1995-10-16'),
+		('E-003','Saw Nanda','Male','Book Keeper','SanNanda211@gmail.com','No.301, Ground Floor, 47th street, Botahtaung Tsp, Yangon','1989-12-01'),
+		('E-004','Kyi Phyu','Female','Warehouse Assistant','KyiPhyuKP221@gmail.com','No. 201, Room 301, Hnin Si street, MingalarTaungNyunt Tsp, Yangon','1980-06-25'),
+		('E-005','Nway Nway','Female','Accountant','Nway232@gmail.com','No.98, Room 501, Sapal street, MingalarTaungNyunt Tsp, Yangon','1986-11-23'),
+		('E-006','Kyaw Htet Aung','Male','Warehouse Assistant','kyawhtetaung29@gmail.com','No.120, Room 201, 124th street, MingalarTaungNyunt Tsp, Yangon','1992-07-18'),
+		('E-007','Kaung Htet','Male','Inventory Manager','KaungH212@gmail.com','No.43, Room 401, 51st street, Botahtaung Tsp, Yangon','1987-03-11'),
+		('E-008','Eaindray Khin','Female','Accountant','Eaindraykhin15@gmail.com','No.15, Room 301, 124th street, MingalarTaungNyunt Tsp, Yangon','1989-05-15'),
+		('E-009','Kyaw Khine','Male','Manager','KyawKhineM19@gmail.com','No.31, Ground Floor, 37th street, PanSoeDan Tsp, Yangon','1980-04-12'),
+		('E-010','Kaung Zaw','Male','Founder','KaungZaw111@gmail.com','No.35, Ground Floor, Aung Tha Pyay street, MingalarTaungNyunt Tsp, Yangon','1976-01-11');
+
+SELECT * FROM Employees;
+
+/*---5. Promotions---*/
+INSERT INTO Promotions
+	(PromotionID,PromotionCode,PromotionType,PromotionDescription,PromotionAmount,PromotionActive,PromotionStartDate,PromotionEndDate)
+VALUES	('Promo-001','B4Uoff15%','Discount Percentage','Customers whose order subtotal is 40,000 or above 40,000 kyats can use this promotion code to be benefitted with 15% discount over order subtotal amount. This code is not limited with numbers of orders',0.15,'Expired','2022-06-13','2022-06-18'),
+		('Promo-002','B4Uoff10%','Discount Percentage','Customers whose order subtotal is 30,000 or above 30,000 kyats can use this promotion code to be benefitted with 10% discount over order subtotal amount. This code is not limited with numbers of orders',0.10,'Active','2022-06-05','2022-07-05'),
+		('Promo-003','B4Uoff5%','Discount Percentage','Customers whose order subtotal is 15,000 or above 15,000 kyats can use this promotion code to be benefitted with 5% discount over order subtotal amount. This code is not limited with numbers of orders',0.05,'Active','2022-06-05','2022-07-05');
+
+SELECT * FROM Promotions;
+
+/*---6. Purchases---*/
+INSERT INTO Purchases
+		(PurchaseID,PurchaseDate,SupplierID)
+VALUES	('Pur-001','2022-06-05','S-001'),
+		('Pur-002','2022-06-05','S-002'),
+		('Pur-003','2022-06-05','S-003'),
+		('Pur-004','2022-06-06','S-009'),
+		('Pur-005','2022-06-07','S-004'),
+		('Pur-006','2022-06-07','S-005'),
+		('Pur-007','2022-06-07','S-006'),
+		('Pur-008','2022-06-08','S-007'),
+		('Pur-009','2022-06-09','S-008'),
+		('Pur-010','2022-06-10','S-010');
+
+SELECT * FROM Purchases;
+
+/*---7. Products---*/
+INSERT INTO Products
+		(ProductID,ProductName,CategoryID,ProductWeight,WeightUnit,UnitPrice,ExpiryDate)
+VALUES	('P-001','Chicken Breast','Cat-001',0.3,'Viss',4000,NULL),
+		('P-002','Burmese Whole Chicken','Cat-001',0.5,'Viss',6000,NULL),
+		('P-003','Pork 3 Layers','Cat-001',300,'g',3200,NULL),
+		('P-004','Chicken Thigh with skin','Cat-001',0.5,'Viss',2500,NULL),
+		('P-005','Danisa Cookies','Cat-003',454,'g',11000,'2024-06-15'),
+		('P-006','Juicy Orange','Cat-003',750,'mL',3000,'2024-12-30'),
+		('P-007','Ovaltine Chocolate Bottle','Cat-003',400,'g',9000,'2024-12-30'),
+		('P-008','Pork Head','Cat-001',0.5,'Viss',6000,NULL),
+		('P-009','Pork Tenderloin','Cat-001',0.5,'Viss',8000,NULL),
+		('P-010','Pork Ribs Special','Cat-001',0.5,'Viss',9500,NULL),
+		('P-011','Chicken Breast','Cat-001',0.3,'Viss',4500,NULL),
+		('P-012','Burmese Whole Chicken','Cat-001',0.5,'Viss',6200,NULL),
+		('P-013','Cabbage 1 pack','Cat-002',NULL,NULL,900,NULL),
+		('P-014','Banana 1 pack','Cat-002',NULL,NULL,2200,NULL),
+		('P-015','Grapes','Cat-002',0.3,'Viss',6000,NULL),
+		('P-016','DingWang Rice Cookies','Cat-003',360,'g',2250,'2024-06-16'),
+		('P-017','Shoon Fatt Corn Biscuit Box','Cat-003',1.5,'kg',12500,'2024-12-12'),
+		('P-018','Nestle Rice Chicken Nutrition Powder','Cat-006',250,'g',6000,'2023-12-01'),
+		('P-019','Komodo Tissues 70pcs','Cat-006',NULL,NULL,4000,NULL),
+		('P-020','Babymild Cherry Blossom Cream','Cat-006',180,'mL',5100,'2024-01-14'),
+		('P-021','NueBabe Feeding Bottle','Cat-006',120,'mL',3600,NULL),
+		('P-022','TYC PawSanHmwe Rice','Cat-010',2,'kg',3150,NULL),
+		('P-023','TYC Salt','Cat-010',500,'g',400,NULL),
+		('P-024','KanBawZa Shan Rice','Cat-010',2,'kg',4200,NULL),
+		('P-025','KanBawZa ShweboPawSan Rice','Cat-010',2,'kg',4200,NULL),
+		('P-026','KanBawZa SeeCho Rice','Cat-010',5,'kg',18500,NULL),
+		('P-027','Mya Shwebo Nutrition Rice','Cat-010',5,'kg',10200,NULL),
+		('P-028','COOK Soybean Oil','Cat-010',1,'L',6000,'2023-06-22'),
+		('P-029','Shwe GroundNut Oil','Cat-010',1,'Viss',14000,'2023-12-1'),
+		('P-030','COOK Sunflower Oil','Cat-010',1.9,'L',13200,'2023-12-1'),
+		('P-031','Massimo Olive Oil','Cat-010',500,'mL',10000,'2024-01-01'),
+		('P-032','DAWN Raw milk','Cat-003',385,'g',2000,'2024-12-01'),
+		('P-033','Premier 3in1 Espresso','Cat-003',600,'g',5500,'2023-12-01'),
+		('P-034','Moccona Trio 3in1 Espresso','Cat-003',486,'g',6300,'2023-12-01'),
+		('P-035','Emotivo Italian White Wine','Cat-004',750,'mL',15500,NULL),
+		('P-036','Saint Louis Vin De France Wine','Cat-004',750,'mL',14000,NULL),
+		('P-037','Chateau de Lavagnac Wine','Cat-004',750,'mL',30000,NULL),
+		('P-038','Mentus Bordeaux Wine','Cat-004',750,'mL',33000,NULL),
+		('P-039','AirX Stomach Relief','Cat-008',NULL,NULL,950,'2023-12-30'),
+		('P-040','Biogestic','Cat-008',NULL,NULL,950,'2023-12-30'),
+		('P-041','Decolgen','Cat-008',NULL,NULL,2300,'2023-12-30'),
+		('P-042','Strepsils Lozenges','Cat-008',NULL,NULL,1300,'2024-01-01'),
+		('P-043','Great Cough Medicine','Cat-008',NULL,NULL,1300,'2024-01-01'),
+		('P-044','Colgate Salt Charcoal Toothpaste','Cat-007',150,'g',3500,'2025-12-30'),
+		('P-045','Colgate Max Fresh Mint Toothpaste','Cat-007',160,'g',3500,'2025-12-30'),
+		('P-046','Clear Shampoo Men','Cat-007',170,'mL',3800,'2025-12-30'),
+		('P-047','Clear Shampoo Women','Cat-007',170,'mL',3800,'2025-12-30'),
+		('P-048','LifeBuyoy Lemon Liquid Soaps','Cat-007',500,'mL',6700,'2025-12-30'),
+		('P-049','Pucci Toast Bread Slices','Cat-009',150,'g',1000,'2022-07-28'),
+		('P-050','Pucci Mayonese Cheese Bread','Cat-009',200,'g',2000,'2022-07-28'),
+		('P-051','Pucci Mini Cakes','Cat-009',200,'g',2000,'2022-08-05'),
+		('P-052','Fried Fish balls','Cat-005',0.20,'Viss',4500,'2022-10-01'),
+		('P-053','Fried Spicy Fish balls','Cat-005',0.20,'Viss',3000,'2022-10-01'),
+		('P-054','Fried Pork Fish balls','Cat-005',0.20,'Viss',4400,'2022-08-15'),
+		('P-055','Fried Fish Pops','Cat-005',0.20,'Viss',5500,'2022-08-15');
+
+SELECT * FROM Products;
+
+/*---8. PurchasedProducts---*/
+INSERT INTO PurchasedProducts
+		(PurchaseID,ProductID,PurchaseLineQuantity)
+VALUES	('Pur-001','P-001',40),
+		('Pur-001','P-002',25),
+		('Pur-001','P-003',25),
+		('Pur-001','P-004',30),
+		('Pur-001','P-008',10),
+		('Pur-001','P-013',20),
+		('Pur-001','P-014',20),
+		('Pur-001','P-015',20),
+		('Pur-002','P-005',40),
+		('Pur-002','P-006',30),
+		('Pur-002','P-007',25),
+		('Pur-002','P-016',30),
+		('Pur-002','P-017',30),
+		('Pur-003','P-009',30),
+		('Pur-003','P-010',25),
+		('Pur-003','P-011',25),
+		('Pur-003','P-012',30),
+		('Pur-004','P-018',30),
+		('Pur-004','P-019',35),
+		('Pur-004','P-020',20),
+		('Pur-004','P-021',15),
+		('Pur-005','P-022',20),
+		('Pur-005','P-023',30),
+		('Pur-005','P-024',24),
+		('Pur-005','P-025',27),
+		('Pur-005','P-026',20),
+		('Pur-005','P-027',20),
+		('Pur-005','P-028',50),
+		('Pur-005','P-029',45),
+		('Pur-005','P-030',40),
+		('Pur-005','P-031',20),
+		('Pur-005','P-032',20),
+		('Pur-005','P-033',20),
+		('Pur-005','P-034',20),
+		('Pur-006','P-035',10),
+		('Pur-006','P-036',10),
+		('Pur-006','P-037',10),
+		('Pur-006','P-038',10),
+		('Pur-007','P-039',20),
+		('Pur-007','P-040',20),
+		('Pur-007','P-041',20),
+		('Pur-007','P-042',20),
+		('Pur-007','P-043',20),
+		('Pur-008','P-044',20),
+		('Pur-008','P-045',30),
+		('Pur-008','P-046',20),
+		('Pur-008','P-047',20),
+		('Pur-008','P-048',20),
+		('Pur-009','P-049',15),
+		('Pur-009','P-050',15),
+		('Pur-009','P-051',15),
+		('Pur-010','P-052',15),
+		('Pur-010','P-053',15),
+		('Pur-010','P-054',15),
+		('Pur-010','P-055',15);
+
+SELECT * FROM PurchasedProducts;
+
+/*---9. Delivery---*/
+INSERT INTO Delivery
+		(DeliveryID,DeliveryDate)
+VALUES	('Deli-001','2022-06-12'),
+		('Deli-002','2022-06-13'),
+		('Deli-003','2022-06-14'),
+		('Deli-004','2022-06-18'),
+		('Deli-005','2022-06-19'),
+		('Deli-006','2022-06-21'),
+		('Deli-007','2022-06-23'),
+		('Deli-008','2022-06-24'),
+		('Deli-009','2022-06-25'),
+		('Deli-010','2022-06-29');
+
+SELECT * FROM Delivery;
+
+/*---10. Orders---*/
+INSERT INTO Orders
+	(OrderID,CustomerID,OrderDate,PromotionID,PaymentAmount,PaymentType,PaymentStatus,OrderStatus,EmployeeID,DeliveryID,DeliveryAddress)
+VALUES	('Ord-001','Cus-001','2022-06-11','Promo-002',52000,'CBPay','Paid','Delivered','E-001','Deli-001','No.19, Room 301, 123th street, MingalarTaungNyunt Tsp, Yangon'),
+		('Ord-002','Cus-002','2022-06-12','Promo-002',45800,'Cash on Delivery','Paid','Delivered','E-001','Deli-002','No.114, Room 201, 135th street, MingalarTaungNyunt Tsp, Yangon'),
+		('Ord-003','Cus-003','2022-06-12','Promo-002',34550,'CBPay','Paid','Delivered','E-002','Deli-002','No.15, Room 201, Aung Tha Pyay street, MingalarTaungNyunt Tsp, Yangon'),
+		('Ord-004','Cus-004','2022-06-13','Promo-001',53250,'KPay','Paid','Delivered','E-002','Deli-003','No.81, Room 501, Hnin Si street, MingalarTaungNyunt Tsp, Yangon'),
+		('Ord-005','Cus-005','2022-06-13','Promo-002',32100,'Cash on Delivery','Paid','Delivered','E-001','Deli-003','No.122, Ground Floor, Kyi Taw street, PaZunTaung Tsp, Yangon'),
+		('Ord-006','Cus-006','2022-06-17','Promo-003',29600,'Cash on Delivery','Paid','Delivered','E-002','Deli-004','No.80, Room 301, Witt Kyaung street, Yay Kyaw Tsp, Yangon'),
+		('Ord-007','Cus-003','2022-06-17','Promo-001',44000,'CBPay','Paid','Delivered','E-001','Deli-004','No.61, Room 501, Aung Tha Pyay street, MingalarTaungNyunt Tsp, Yangon'),
+		('Ord-008','Cus-006','2022-06-18','Promo-001',46500,'Cash on Delivery','Paid','Delivered','E-002','Deli-005','No.80, Room 301, Witt Kyaung street, Yay Kyaw Tsp, Yangon'),
+		('Ord-009','Cus-007','2022-06-20','Promo-003',28350,'KPay','Paid','Delivered','E-001','Deli-006','No.80, Room 401, ThuDaMar street, Kyauk Myaung Tsp, Yangon'),
+		('Ord-010','Cus-008','2022-06-22',NULL,12000,'Cash on Delivery','Paid','Delivered','E-002','Deli-007','No.15, Room 201, Aung Tha Pyay street, MingalarTaungNyunt Tsp, Yangon'),
+		('Ord-011','Cus-003','2022-06-23',NULL,10300,'CBPay','Paid','On the way','E-001','Deli-008','No.15, Room 101, Bayint Naung Road, North Dagon Tsp, Yangon'),
+		('Ord-012','Cus-009','2022-06-24','Promo-003',NULL,'Cash on Delivery','Not Paid','Preparing','E-002','Deli-009','No.64, Room 201, Than street, Hlaing Tsp, Yangon'),
+		('Ord-013','Cus-010','2022-06-28','Promo-003',NULL,'Cash on Delivery','Not Paid','Preparing','E-001','Deli-010','No.51, Ground Floor, 47th street, Botahtaung Tsp, Yangon');
+
+SELECT * FROM Orders;
+
+/*---11. OrderProducts---*/
+INSERT INTO OrderProducts
+		(OrderID,ProductID,OrderLineQuantity)
+VALUES	('Ord-001','P-001',2),
+		('Ord-001','P-015',3),
+		('Ord-001','P-007',1),
+		('Ord-001','P-013',1),
+		('Ord-001','P-009',2),
+		('Ord-002','P-036',1),
+		('Ord-002','P-015',2),
+		('Ord-002','P-054',2),
+		('Ord-002','P-005',1),
+		('Ord-003','P-006',2),
+		('Ord-003','P-009',2),
+		('Ord-003','P-016',1),
+		('Ord-003','P-034',1),
+		('Ord-003','P-050',2),
+		('Ord-004','P-030',2),
+		('Ord-004','P-009',1),
+		('Ord-004','P-014',1),
+		('Ord-004','P-033',1),
+		('Ord-004','P-022',1),
+		('Ord-004','P-001',2),
+		('Ord-005','P-011',2),
+		('Ord-005','P-001',1),
+		('Ord-005','P-005',1),
+		('Ord-005','P-013',2),
+		('Ord-005','P-022',2),
+		('Ord-006','P-001',2),
+		('Ord-006','P-014',1),
+		('Ord-006','P-025',2),
+		('Ord-006','P-033',2),
+		('Ord-007','P-028',2),
+		('Ord-007','P-038',1),
+		('Ord-007','P-015',1),
+		('Ord-008','P-029',1),
+		('Ord-008','P-040',1),
+		('Ord-008','P-017',1),
+		('Ord-008','P-020',1),
+		('Ord-008','P-021',1),
+		('Ord-008','P-027',1),
+		('Ord-009','P-034',2),
+		('Ord-009','P-040',1),
+		('Ord-009','P-031',1),
+		('Ord-009','P-001',1),
+		('Ord-009','P-023',2),
+		('Ord-010','P-002',1),
+		('Ord-010','P-015',1),
+		('Ord-011','P-034',1),
+		('Ord-011','P-001',1),
+		('Ord-012','P-030',1),
+		('Ord-012','P-044',1),
+		('Ord-012','P-014',1),
+		('Ord-013','P-002',1),
+		('Ord-013','P-018',1),
+		('Ord-013','P-032',3),
+		('Ord-013','P-022',2);
+
+SELECT * FROM OrderProducts;
+
+
+
+
+
+/*----------ALTER & UPDATE QUERY CODES----------*/
+/*---ALTER OrderProducts---*/
+ALTER TABLE OrderProducts
+ADD OrderLineAmount Decimal(10,2);
+
+UPDATE OrderProducts
+SET OrderLineAmount =  (OrderLineQuantity)	*	(SELECT UnitPrice 
+												FROM Products 
+												WHERE Products.ProductID = OrderProducts.ProductID);
+
+SELECT * FROM OrderProducts;
+
+
+/*---ALTER Orders---*/
+ALTER TABLE Orders
+ADD TotalOrderQuantity Integer,
+	SubTotal Decimal(10,2),
+	PromotionDiscountAmount Decimal(10,2),
+	Tax Decimal(10,2),
+	TotalOrderAmount Decimal(10,2);
+
+UPDATE Orders
+SET TotalOrderQuantity =	(SELECT SUM(OrderLineQuantity) 
+							FROM OrderProducts 
+							WHERE Orders.OrderID = OrderProducts.OrderID);
+
+UPDATE Orders
+SET SubTotal =	(SELECT SUM(OrderLineAmount) 
+				FROM OrderProducts 
+				WHERE Orders.OrderID = OrderProducts.OrderID);
+
+UPDATE Orders
+SET Tax = (SubTotal) * 0.05;
+
+UPDATE Orders 
+SET PromotionDiscountAmount =	(Orders.SubTotal)	*	(SELECT PromotionAmount 
+														FROM Promotions 
+														WHERE Orders.PromotionID = Promotions.PromotionID);
+
+UPDATE Orders
+SET TotalOrderAmount =	(Orders.SubTotal)	-	ISNULL(0,(Orders.PromotionDiscountAmount))	+	(Orders.Tax);
+
+SELECT * FROM Orders;
+
+
+/*---ALTER PurchasedProducts---*/
+ALTER TABLE PurchasedProducts
+ADD PurchaseLineAmount Decimal(10,2);
+
+UPDATE PurchasedProducts
+SET PurchaseLineAmount =	(PurchaseLineQuantity)	*	(SELECT UnitPrice 
+														FROM Products 
+														WHERE Products.ProductID = PurchasedProducts.ProductID);
+
+SELECT * FROM PurchasedProducts;
+
+
+/*---ALTER Purchases---*/
+ALTER TABLE Purchases
+ADD TotalPurchaseQuantity Integer,
+	TotalPurchaseAmount Decimal(10,2);
+
+UPDATE Purchases
+SET TotalPurchaseQuantity =	(SELECT SUM(PurchaseLineQuantity) 
+							FROM PurchasedProducts 
+							WHERE Purchases.PurchaseID = PurchasedProducts.PurchaseID);
+
+UPDATE Purchases
+SET TotalPurchaseAmount =	(SELECT SUM(PurchaseLineAmount) 
+							FROM PurchasedProducts 
+							WHERE Purchases.PurchaseID = PurchasedProducts.PurchaseID);
+
+SELECT * FROM Purchases;
+
+
+
+
+
+/*----------SQL REPORT QUERY CODES----------*/
+/*---1. Top 5 most bought products---*/
+SELECT TOP 5 p.ProductName as 'Top 5 Most Bought Products For June Month', 
+SUM(op.OrderLineQuantity) as TotalOrderQuantity 
+FROM OrderProducts as op,Products as p, Orders as o
+WHERE op.ProductID = p.ProductID
+AND op.OrderID = o.OrderID
+AND o.OrderDate BETWEEN '2022-06-01' AND '2022-06-30'
+GROUP BY op.ProductID, p.ProductName
+ORDER BY SUM(op.OrderLineQuantity) DESC;
+
+
+/*---2. Top 5 least bought products---*/
+SELECT TOP 5 p.ProductName as 'Top 5 Least Bought Products For June Month', 
+SUM(op.OrderLineQuantity) as 'Total Order Quantity' 
+FROM OrderProducts as op,Products as p, Orders as o
+WHERE op.ProductID = p.ProductID
+AND op.OrderID = o.OrderID
+AND o.OrderDate BETWEEN '2022-06-01' AND '2022-06-30'
+GROUP BY op.ProductID, p.ProductName
+ORDER BY SUM(op.OrderLineQuantity) ;
+
+
+/*---3. 10 Products that have not been bought together with Quantity left---*/
+SELECT TOP 10 p.ProductName as 'Name of Products that have not been bought', p.ProductID, 
+pp.PurchaseLineQuantity as 'Quantity left'
+FROM Products as p, PurchasedProducts as pp
+WHERE NOT EXISTS (SELECT 1
+                  FROM OrderProducts as op
+                  WHERE p.ProductID = op.ProductID)
+AND p.ProductID = pp.ProductID
+ORDER BY 'Quantity left' DESC;
+
+
+/*---4. Tax to pay from Basket4U---*/
+SELECT SUM(o.Tax) as 'Total Tax To Pay This Year'
+FROM Orders as o
+WHERE o.OrderDate BETWEEN '2022-01-01' AND '2022-12-31';
+
+
+/*---5. Most Used Promotion Code For the year---*/
+SELECT promo.PromotionCode as 'Most Used Promotion Code For The Year', COUNT(o.PromotionID) as 'Total Times Used' 
+FROM Orders as o, Promotions as promo
+WHERE o.PromotionID = promo.PromotionID
+AND o.OrderDate BETWEEN '2022-01-01' AND '2022-12-31'
+GROUP BY promo.PromotionCode
+ORDER BY 'Total Times Used' DESC;
+
+
+/*---6. TOP 5 Most Bought Categories with Total Quantity Bought For June---*/
+SELECT TOP 5 cat.CategoryName as 'Top 5 Most Bought Categories for June', cat.CategoryID, 
+SUM(op.OrderLineQuantity) as 'Total Quantity Bought'
+FROM Categories as cat, Products as p, OrderProducts as op, Orders as o
+WHERE p.ProductID = op.ProductID
+AND p.CategoryID = cat.CategoryID
+AND o.OrderID = op.OrderID
+AND o.OrderDate BETWEEN '2022-01-01' AND '2022-12-31'
+GROUP BY cat.CategoryID, cat.CategoryName
+ORDER BY 'Total Quantity Bought' DESC;
+
+
+/*---7. Top 5 Purchased Products From Suppliers for June Month with Total Purchase Quantity---*/
+SELECT TOP 5 p.ProductName as 'Top 5 Most Purchased Products For June Month',pp.ProductID, 
+SUM(pp.PurchaseLineQuantity) as 'Total Purchase Quantity', s.SupplierName
+FROM PurchasedProducts as pp,Products as p, Purchases as pur,Suppliers as s
+WHERE pp.ProductID = p.ProductID
+AND pp.PurchaseID = pur.PurchaseID
+AND pur.SupplierID = s.SupplierID
+AND pur.PurchaseDate BETWEEN '2022-06-01' AND '2022-06-30'
+GROUP BY pp.ProductID, p.ProductName, s.SupplierName
+ORDER BY SUM(pp.PurchaseLineQuantity) DESC;
+
+
+/*---8. Top 3 Customers that orders the most times from Basket4U---*/
+SELECT TOP 3 cus.CustomerName as 'Top 3 Customers that orders the most times from Basket4U', cus.CustomerID, 
+COUNT(o.OrderID) as 'Order Times'
+FROM Orders as o, Customers as cus
+WHERE o.CustomerID = cus.CustomerID
+GROUP BY cus.CustomerName, cus.CustomerID
+ORDER BY 'Order Times' DESC;
+
+
+/*---9. Top 5 Customers that has the largest order values of all time---*/
+SELECT TOP 5 cus.CustomerName as 'Top 5 Customers that has the largest order values of all time', cus.CustomerID, 
+SUM(o.TotalOrderAmount) as 'Order Values'
+FROM Customers as cus, Orders as o
+WHERE o.CustomerID = cus.CustomerID
+GROUP BY cus.CustomerName, cus.CustomerID
+ORDER BY 'Order Values' DESC;
+
+
+/*---10. Top 3 Days that Delivery has to send most orders---*/
+SELECT TOP 3 deli.DeliveryDate 'Top 3 Days that Delivery has to send most orders', deli.DeliveryID,
+Count(o.DeliveryID) as 'Total Orders' 
+FROM Orders as o, Delivery as deli
+WHERE o.DeliveryID = deli.DeliveryID
+GROUP BY deli.DeliveryDate,deli.DeliveryID
+ORDER BY 'Total Orders' DESC;
+
+
+
+
+
+
+
