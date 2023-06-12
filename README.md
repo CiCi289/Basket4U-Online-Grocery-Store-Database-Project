@@ -4,6 +4,7 @@ This is a database design and development academic project built, documented and
 
 # To get started with Viewing, 
 I had fully documented all required information about How i designed and developed the database for the project from Conceptual to Physical stages, in "Ci Htin Aung_DBDD Documentation.pdf" file. 
+For confidential information matters, some cover pages including private information are removed.
 
 In Database folder, There are necessary database files (.ldf, .mdf files) to be inserted and viewed in MSSQL. 
 
